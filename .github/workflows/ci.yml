@@ -76,8 +76,12 @@ jobs:
         run: |
           mkdir pages
 
-          cp -r dist/dev/browser pages/dev
-          cp -r dist/prod/browser pages/prod
+          cp -r dist/dev/browser/* pages/dev
+          cp -r dist/prod/browser/* pages/prod
+
+      - name: Inspect Pages artifact
+        run: |
+          find pages -maxdepth 2 -type f
 
       - uses: actions/upload-pages-artifact@v3
         with:
