@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: upload_my_artifact
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
