@@ -74,8 +74,8 @@ jobs:
         run: |
           mkdir pages
 
-          cp -r dist/dev pages/dev
-          cp -r dist/prod pages/prod
+          cp -r dist/dev/browser pages/dev
+          cp -r dist/prod/browser pages/prod
 
       - uses: actions/upload-pages-artifact@v3
         with:
