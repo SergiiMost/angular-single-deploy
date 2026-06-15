@@ -98,6 +98,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: pages
+          name: upload_my_artifact
 
   deploy:
     needs: build
@@ -105,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: github-pages
+      name: upload_my_artifact
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
