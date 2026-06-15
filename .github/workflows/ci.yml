@@ -87,6 +87,7 @@ jobs:
 
           cp -r dist/dev/browser/* pages/dev
           cp -r dist/prod/browser/* pages/prod
+          ls -la
 
       - name: Inspect Pages artifact
         run: |
