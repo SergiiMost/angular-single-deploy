@@ -95,6 +95,12 @@ jobs:
           cd dist 
           ls -la
 
+      - name: Log File System Outside
+        run: |
+          echo "File System"
+          cd ..
+          ls -la
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: pages
