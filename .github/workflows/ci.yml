@@ -62,12 +62,14 @@ jobs:
         run: |
           npm run build -- \
             --configuration development \
+            --base-href /angular-single-deploy/dev/ \
             --output-path dist/dev
 
       - name: Build production
         run: |
           npm run build -- \
             --configuration production \
+            --base-href /angular-single-deploy/prod/ \
             --output-path dist/prod
 
       - name: Prepare Pages artifact
