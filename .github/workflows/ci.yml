@@ -38,7 +38,7 @@ jobs:
         run: npx ng lint
 
       - name: Test
-        run: npx ng test --no-watch --no-progress --browsers=ChromeHeadless
+        run: npx ng test --no-watch --no-progress
 
   # ── 2. Build (production) ─────────────────────────────────────────────────
   build-production:
