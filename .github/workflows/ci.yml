@@ -98,7 +98,6 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: pages
-          name: upload_my_artifact
 
   deploy:
     needs: build
