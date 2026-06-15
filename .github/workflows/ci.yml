@@ -101,7 +101,7 @@ jobs:
       - name: Log File System Outside
         run: |
           echo "File System"
-          cd ../..
+          cd ..
           ls -la
 
       - uses: actions/upload-pages-artifact@v3
