@@ -1,0 +1,157 @@
+name: CI / Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; cancel older runs on the same branch
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. Lint & Test ────────────────────────────────────────────────────────
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx ng lint
+
+      - name: Test
+        run: npx ng test --no-watch --no-progress --browsers=ChromeHeadless
+
+  # ── 2. Build (production) ─────────────────────────────────────────────────
+  build-production:
+    name: Build — production
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (production)
+        run: npx ng build --configuration=production --base-href /production/
+
+      # dist/my-angular-app/production → upload as artifact
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-production
+          path: dist/my-angular-app/production
+          retention-days: 1
+
+  # ── 3. Build (development) ────────────────────────────────────────────────
+  build-development:
+    name: Build — development
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (development)
+        run: npx ng build --configuration=development --base-href /development/
+
+      # dist/my-angular-app/development → upload as artifact
+      - name: Upload development build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-development
+          path: dist/my-angular-app/development
+          retention-days: 1
+
+  # ── 4. Assemble & Deploy ──────────────────────────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build-production, build-development]
+    # Only deploy on pushes to main (not on PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download production build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-production
+          path: gh-pages/production
+
+      - name: Download development build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-development
+          path: gh-pages/development
+
+      # Optional: add a simple root index that links to both builds
+      - name: Create root index
+        run: |
+          cat > gh-pages/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <title>my-angular-app — builds</title>
+            <style>
+              body { font-family: sans-serif; max-width: 480px; margin: 4rem auto; }
+              a { display: block; margin: 1rem 0; font-size: 1.1rem; }
+            </style>
+          </head>
+          <body>
+            <h1>my-angular-app</h1>
+            <a href="production/">🚀 Production build</a>
+            <a href="development/">🔧 Development build</a>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: gh-pages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
