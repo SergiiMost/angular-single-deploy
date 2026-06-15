@@ -80,11 +80,14 @@ jobs:
 
       - name: Prepare Pages artifact
         run: |
+          pwd
           mkdir -p pages/dev
           mkdir -p pages/prod
+          pwd
 
           cp -r dist/dev/browser/* pages/dev
           cp -r dist/prod/browser/* pages/prod
+
       - name: Inspect Pages artifact
         run: |
           find pages -maxdepth 2 -type f
